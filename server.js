@@ -545,10 +545,9 @@ const htmlContent = `<!DOCTYPE html>
             const gtiLeft = getBoxAnchor('block-gti', 'left');
             const gtiRight = getBoxAnchor('block-gti', 'right');
             const loadLeft = getBoxAnchor('block-load', 'left');
-            const gridBottom = getBoxAnchor('block-grid', 'bottom');
             const loadTop = getBoxAnchor('block-load', 'top');
+            const gridBottom = getBoxAnchor('block-grid', 'bottom');
 
-            // Ép tọa độ Y của MPPT right trùng khớp tuyệt đối với GTI left để tạo đường thẳng ngang 100%
             const targetY = gtiLeft.y;
             const fixedMpptRight = { x: mpptRight.x, y: targetY };
 
@@ -560,14 +559,16 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-pv-mppt', 'guide-pv-mppt', 'M ' + pvBottom.x + ' ' + pvBottom.y + ' L ' + mpptTop.x + ' ' + mpptTop.y);
             setPathD('path-mppt-bat-charge', 'guide-mppt-bat-charge', 'M ' + mpptBottomLeft.x + ' ' + mpptBottomLeft.y + ' L ' + batTopLeft.x + ' ' + batTopLeft.y);
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
-            
-            // Đường thẳng ngang tuyệt đối từ MPPT sang GTI
             setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
-            const midXLoad = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
-            setPathD('path-gti-load', 'guide-gti-load', 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + loadLeft.y + ' L ' + loadLeft.x + ' ' + loadLeft.y);
-            
-            setPathD('path-grid-load', 'guide-grid-load', 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + loadTop.x + ' ' + loadTop.y);
+            // Cho đường bám tải đi ngang sang phải, sau đó quẹo xuống chạy song song với đường từ Lưới vào Tải
+            const junctionX = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
+            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadLeft.y;
+            setPathD('path-gti-load', 'guide-gti-load', gtiLoadPath);
+
+            // Đường Lưới đi thẳng xuống Tải và chia sẻ chung một trục dọc (junctionX) với đường bám tải để chạy song song tuyệt đối
+            const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + gridBottom.x + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadTop.y;
+            setPathD('path-grid-load', 'guide-grid-load', gridLoadPath);
         }
 
         function setPathD(mainId, guideId, d) {
