@@ -544,7 +544,6 @@ const htmlContent = `<!DOCTYPE html>
             const mpptRight = getBoxAnchor('block-mppt', 'right');
             const gtiLeft = getBoxAnchor('block-gti', 'left');
             const gtiRight = getBoxAnchor('block-gti', 'right');
-            const loadLeft = getBoxAnchor('block-load', 'left');
             const loadTop = getBoxAnchor('block-load', 'top');
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
 
@@ -561,14 +560,13 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
-            // Đường bám tải đi ngang sang phải một khoảng hợp lý rồi quẹo vuông góc chạy xuống song song với đường lưới
-            const junctionX = gtiRight.x + 45;
-            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadTop.y;
-            setPathD('path-gti-load', 'guide-gti-load', gtiLoadPath);
-
-            // Đường Lưới chạy thẳng xuống và quẹo trái vào Tải
-            const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + gridBottom.x + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadTop.y;
+            // Dùng chung một trục dọc thẳng hàng cho cả Lưới và Bám tải chạy song song sát nhau xuống Tải
+            const sharedX = gridBottom.x;
+            const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + sharedX + ' ' + loadTop.y + ' L ' + loadTop.x + ' ' + loadTop.y;
             setPathD('path-grid-load', 'guide-grid-load', gridLoadPath);
+
+            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + sharedX + ' ' + gtiRight.y + ' L ' + sharedX + ' ' + loadTop.y + ' L ' + loadTop.x + ' ' + loadTop.y;
+            setPathD('path-gti-load', 'guide-gti-load', gtiLoadPath);
         }
 
         function setPathD(mainId, guideId, d) {
