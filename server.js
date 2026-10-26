@@ -26,7 +26,36 @@ let state = {
   gridKwh: 0.00,
   loadPower: 212.33,
   loadKwh: 2.10,
-  savingsVnd: 6448
+  savingsVnd: 6448,
+  // Lịch sử tháng chi tiết cho Tab Lịch sử
+  historyDays: [
+    { date: "01/10", discharge: 3.5, grid: 9.22, load: 12.72 },
+    { date: "02/10", discharge: 2.82, grid: 10.59, load: 13.41 },
+    { date: "03/10", discharge: 2.52, grid: 5.39, load: 7.91 },
+    { date: "04/10", discharge: 1.77, grid: 5.72, load: 7.48 },
+    { date: "05/10", discharge: 2.39, grid: 5.78, load: 8.17 },
+    { date: "06/10", discharge: 2.59, grid: 5.17, load: 7.77 },
+    { date: "07/10", discharge: 2.28, grid: 5.45, load: 7.74 },
+    { date: "08/10", discharge: 2.32, grid: 4.66, load: 6.98 },
+    { date: "09/10", discharge: 2.55, grid: 5.55, load: 8.1 },
+    { date: "10/10", discharge: 2.26, grid: 4.28, load: 6.55 },
+    { date: "11/10", discharge: 2.7, grid: 5.12, load: 7.82 },
+    { date: "12/10", discharge: 2.96, grid: 7.0, load: 9.97 },
+    { date: "13/10", discharge: 2.3, grid: 6.86, load: 9.16 },
+    { date: "14/10", discharge: 2.48, grid: 5.49, load: 7.97 },
+    { date: "15/10", discharge: 2.55, grid: 5.23, load: 7.78 },
+    { date: "16/10", discharge: 2.57, grid: 5.59, load: 8.17 },
+    { date: "17/10", discharge: 2.44, grid: 5.5, load: 7.93 },
+    { date: "18/10", discharge: 2.71, grid: 6.2, load: 8.91 },
+    { date: "19/10", discharge: 2.63, grid: 6.36, load: 8.99 },
+    { date: "20/10", discharge: 2.45, grid: 6.53, load: 8.98 },
+    { date: "21/10", discharge: 2.51, grid: 5.32, load: 7.84 },
+    { date: "22/10", discharge: 2.33, grid: 7.78, load: 10.11 },
+    { date: "23/10", discharge: 2.45, grid: 5.77, load: 8.22 },
+    { date: "24/10", discharge: 2.64, grid: 5.29, load: 7.93 },
+    { date: "25/10", discharge: 2.23, grid: 8.14, load: 10.37 },
+    { date: "26/10", discharge: 1.54, grid: 2.45, load: 3.99 }
+  ]
 };
 
 const htmlContent = `<!DOCTYPE html>
@@ -85,7 +114,7 @@ const htmlContent = `<!DOCTYPE html>
                 <i class="fa-solid fa-piggy-bank text-emerald-400 text-lg"></i>
                 <div class="text-left">
                     <span class="text-[10px] text-slate-400 block uppercase font-medium">Tiết kiệm hôm nay</span>
-                    <span id="evnSavings" class="text-xs font-bold text-emerald-400">6.448 đ</span>
+                    <span class="text-xs font-bold text-emerald-400">6.448 đ</span>
                 </div>
             </div>
 
@@ -107,7 +136,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thu PV</span>
                     <i class="fa-solid fa-sun text-sm"></i>
                 </div>
-                <div id="summaryTotalYield" class="text-base md:text-lg font-black text-amber-400">177 W</div>
+                <div class="text-base md:text-lg font-black text-amber-400">177 W</div>
                 <span class="text-[9px] text-slate-500">Hôm nay: 2.579 kWh</span>
             </div>
 
@@ -116,7 +145,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tiêu Thụ</span>
                     <i class="fa-solid fa-house-crack text-sm"></i>
                 </div>
-                <div id="summaryTotalConsumption" class="text-base md:text-lg font-black text-purple-400">212 W</div>
+                <div class="text-base md:text-lg font-black text-purple-400">212 W</div>
                 <span class="text-[9px] text-slate-500">Tải gia đình</span>
             </div>
 
@@ -125,7 +154,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hòa Lưới</span>
                     <i class="fa-solid fa-plug-circle-bolt text-sm"></i>
                 </div>
-                <div id="summaryGridFeedIn" class="text-base md:text-lg font-black text-cyan-400">0 W</div>
+                <div class="text-base md:text-lg font-black text-cyan-400">0 W</div>
                 <span class="text-[9px] text-slate-500">GTI Bám tải</span>
             </div>
 
@@ -134,7 +163,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lấy Lưới</span>
                     <i class="fa-solid fa-tower-cell text-sm"></i>
                 </div>
-                <div id="summaryGridImport" class="text-base md:text-lg font-black text-indigo-400">12 W</div>
+                <div class="text-base md:text-lg font-black text-indigo-400">12 W</div>
                 <span class="text-[9px] text-slate-500">EVN bù vào</span>
             </div>
 
@@ -143,7 +172,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tiền Tiết Kiệm</span>
                     <i class="fa-solid fa-piggy-bank text-sm"></i>
                 </div>
-                <div id="summaryEstimatedBill" class="text-base md:text-lg font-black text-emerald-400">6.448 đ</div>
+                <div class="text-base md:text-lg font-black text-emerald-400">6.448 đ</div>
                 <span class="text-[9px] text-slate-500">Tạm tính hôm nay</span>
             </div>
         </div>
@@ -312,13 +341,75 @@ const htmlContent = `<!DOCTYPE html>
         </div>
     </main>
 
-    <!-- TAB LỊCH SỬ -->
+    <!-- TAB LỊCH SỬ & THỐNG KÊ -->
     <main id="historyView" class="container mx-auto p-4 md:p-6 flex-1 flex-col gap-6 hidden">
         <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4">
-            <h2 class="text-lg font-extrabold text-white"><i class="fa-solid fa-chart-column text-cyan-400 mr-2"></i>Lịch Sử Năng Lượng 1 Tháng</h2>
+            <div>
+                <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-cyan-400"></i> Lịch Sử Năng Lượng & Thống Kê 1 Tháng
+                </h2>
+                <p class="text-xs text-slate-400">Báo cáo sản lượng hòa lưới và lấy lưới chi tiết</p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800">
+                <i class="fa-regular fa-calendar text-cyan-400 text-xs"></i>
+                <label for="monthSelect" class="text-xs text-slate-400 font-medium">Tháng:</label>
+                <select id="monthSelect" class="bg-transparent text-xs text-cyan-400 font-bold focus:outline-none cursor-pointer">
+                    <option value="10-2026">Tháng 10 / 2026</option>
+                </select>
+            </div>
         </div>
-        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-            <canvas id="monthlyChart" height="100"></canvas>
+
+        <!-- Tóm tắt số liệu -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <span class="text-xs text-slate-400 block mb-1">Tổng năng lượng hòa (xả)</span>
+                <span id="sum-discharge" class="text-lg font-black text-cyan-400">64.5 kWh</span>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <span class="text-xs text-slate-400 block mb-1">Tổng lấy lưới</span>
+                <span id="sum-grid" class="text-lg font-black text-amber-400">156.46 kWh</span>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <span class="text-xs text-slate-400 block mb-1">Tiết kiệm ước tính</span>
+                <span id="sum-saving" class="text-lg font-black text-emerald-400">179.764 đ</span>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <span class="text-xs text-slate-400 block mb-1">% Hòa lưới / Tổng tải</span>
+                <span id="sum-ratio" class="text-lg font-black text-purple-400">29.18%</span>
+            </div>
+        </div>
+
+        <!-- Chuyển đổi Biểu đồ / Bảng -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 md:p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-cyan-400"></i> Chi Tiết Từng Ngày Trong Tháng
+                </h3>
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button id="btn-chart" onclick="switchView('chart')" class="px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition">Biểu đồ</button>
+                    <button id="btn-table" onclick="switchView('table')" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">Bảng</button>
+                </div>
+            </div>
+
+            <!-- View Biểu Đồ -->
+            <div id="view-chart-container" class="h-72">
+                <canvas id="historyChart"></canvas>
+            </div>
+
+            <!-- View Bảng -->
+            <div id="view-table-container" class="hidden overflow-x-auto max-h-80">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                        <tr>
+                            <th class="py-3 px-4">Ngày</th>
+                            <th class="py-3 px-4 text-cyan-400">Hòa lưới (kWh)</th>
+                            <th class="py-3 px-4 text-amber-400">Lấy lưới (kWh)</th>
+                            <th class="py-3 px-4 text-purple-400">Tổng tiêu thụ (kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-800/60 font-medium"></tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -327,11 +418,14 @@ const htmlContent = `<!DOCTYPE html>
     </footer>
 
     <script>
+        let historyDaysData = ${JSON.stringify(state.historyDays)};
+        let chartInstance = null;
         let particleProgress = { pv_mppt: 0, mppt_bat: 0, mppt_gti: 0, gti_load: 0, grid_load: 0 };
 
         window.addEventListener('load', () => {
             updatePaths();
             startAnimation();
+            initHistoryTableAndChart();
         });
         window.addEventListener('resize', updatePaths);
 
@@ -351,7 +445,62 @@ const htmlContent = `<!DOCTYPE html>
                 historyView.classList.remove('hidden');
                 hBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow-md";
                 rBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                if(chartInstance) chartInstance.update();
             }
+        }
+
+        function switchView(type) {
+            const chartDiv = document.getElementById('view-chart-container');
+            const tableDiv = document.getElementById('view-table-container');
+            const btnC = document.getElementById('btn-chart');
+            const btnT = document.getElementById('btn-table');
+            if(type === 'chart') {
+                chartDiv.classList.remove('hidden');
+                tableDiv.classList.add('hidden');
+                btnC.className = "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
+                btnT.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                if(chartInstance) chartInstance.update();
+            } else {
+                chartDiv.classList.add('hidden');
+                tableDiv.classList.remove('hidden');
+                btnT.className = "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
+                btnC.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+            }
+        }
+
+        function initHistoryTableAndChart() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            historyDaysData.forEach(item => {
+                tbody.innerHTML += '<tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">' +
+                    '<td class="py-3 px-4 font-bold text-slate-200">' + item.date + '</td>' +
+                    '<td class="py-3 px-4 text-cyan-400 font-bold">' + item.discharge + '</td>' +
+                    '<td class="py-3 px-4 text-amber-400 font-bold">' + item.grid + '</td>' +
+                    '<td class="py-3 px-4 text-purple-400 font-bold">' + item.load + '</td>' +
+                '</tr>';
+            });
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: historyDaysData.map(i => i.date),
+                    datasets: [
+                        { label: 'Hòa lưới (kWh)', data: historyDaysData.map(i => i.discharge), backgroundColor: '#06b6d4', borderRadius: 4 },
+                        { label: 'Lấy lưới (kWh)', data: historyDaysData.map(i => i.grid), backgroundColor: '#f59e0b', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
+                        y: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+                    }
+                }
+            });
         }
 
         function getBoxAnchor(elementId, position) {
@@ -412,7 +561,6 @@ const htmlContent = `<!DOCTYPE html>
             const group = document.getElementById('particlesGroup');
             if (!group) return;
             group.innerHTML = '';
-
             drawFlowingParticles('path-pv-mppt', '#f59e0b', 'pv_mppt');
             drawFlowingParticles('path-mppt-bat', '#10b981', 'mppt_bat');
             drawFlowingParticles('path-mppt-gti', '#06b6d4', 'mppt_gti');
@@ -425,10 +573,8 @@ const htmlContent = `<!DOCTYPE html>
             if (!path) return;
             const pathLength = path.getTotalLength();
             if (pathLength === 0) return;
-
             particleProgress[progressKey] += 0.002;
             if (particleProgress[progressKey] > 1) particleProgress[progressKey] = 0;
-
             const group = document.getElementById('particlesGroup');
             for (let i = 0; i < 3; i++) {
                 let offset = (particleProgress[progressKey] + i * 0.33) % 1;
@@ -452,33 +598,24 @@ const server = http.createServer((req, res) => {
     res.end(htmlContent);
     return;
   }
-
   if (req.method === 'POST' && req.url === '/update') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       try {
-        const newData = JSON.parse(body);
-        state = { ...state, ...newData };
-        
+        state = { ...state, ...JSON.parse(body) };
         wss.clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(state));
-          }
+          if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(state));
         });
-
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'success' }));
       } catch (e) {
-        res.writeHead(400);
-        res.end('Invalid JSON');
+        res.writeHead(400); res.end('Invalid JSON');
       }
     });
     return;
   }
-
-  res.writeHead(404);
-  res.end();
+  res.writeHead(404); res.end();
 });
 
 const wss = new WebSocket.Server({ server });
