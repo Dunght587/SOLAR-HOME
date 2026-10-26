@@ -561,12 +561,12 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
-            // Cho đường bám tải đi ngang sang phải, sau đó quẹo xuống chạy song song với đường từ Lưới vào Tải
-            const junctionX = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
-            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadLeft.y;
+            // Đường bám tải đi ngang sang phải một khoảng hợp lý rồi quẹo vuông góc chạy xuống song song với đường lưới
+            const junctionX = gtiRight.x + 45;
+            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + gtiRight.y + ' L ' + junctionX + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadTop.y;
             setPathD('path-gti-load', 'guide-gti-load', gtiLoadPath);
 
-            // Đường Lưới đi thẳng xuống Tải và chia sẻ chung một trục dọc (junctionX) với đường bám tải để chạy song song tuyệt đối
+            // Đường Lưới chạy thẳng xuống và quẹo trái vào Tải
             const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + gridBottom.x + ' ' + loadTop.y + ' L ' + loadLeft.x + ' ' + loadTop.y;
             setPathD('path-grid-load', 'guide-grid-load', gridLoadPath);
         }
