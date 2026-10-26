@@ -179,13 +179,15 @@ const htmlContent = `<!DOCTYPE html>
         <div class="relative w-full max-w-6xl bg-slate-900/50 rounded-3xl border border-slate-800/80 p-6 md:p-10 my-2 backdrop-blur-md overflow-hidden shadow-2xl">
             <svg id="svgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0">
                 <path id="path-pv-mppt" class="flow-path-bg"></path>
-                <path id="path-mppt-bat" class="flow-path-bg"></path>
+                <path id="path-mppt-bat-charge" class="flow-path-bg"></path>
+                <path id="path-mppt-bat-discharge" class="flow-path-bg"></path>
                 <path id="path-mppt-gti" class="flow-path-bg"></path>
                 <path id="path-gti-load" class="flow-path-bg"></path>
                 <path id="path-grid-load" class="flow-path-bg"></path>
 
                 <path id="guide-pv-mppt" class="flow-path-guide"></path>
-                <path id="guide-mppt-bat" class="flow-path-guide"></path>
+                <path id="guide-mppt-bat-charge" class="flow-path-guide"></path>
+                <path id="guide-mppt-bat-discharge" class="flow-path-guide"></path>
                 <path id="guide-mppt-gti" class="flow-path-guide"></path>
                 <path id="guide-gti-load" class="flow-path-guide"></path>
                 <path id="guide-grid-load" class="flow-path-guide"></path>
@@ -194,8 +196,8 @@ const htmlContent = `<!DOCTYPE html>
             </svg>
 
             <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-y-10 md:gap-x-16 items-center">
-                <!-- CỘT 1 -->
-                <div class="flex flex-col gap-8 justify-between items-center md:items-start">
+                <!-- CỘT 1: Căn chỉnh chiều cao đồng đều để MPPT thẳng hàng ngang với GTI -->
+                <div class="flex flex-col justify-around h-full items-center md:items-start gap-6 md:gap-12">
                     <div id="block-pv" class="block-card w-full max-w-xs bg-slate-950/90 border-2 border-amber-500/40 rounded-2xl p-4 relative">
                         <div class="flex items-center gap-3 border-b border-amber-500/20 pb-2 mb-2.5">
                             <div class="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
@@ -274,7 +276,7 @@ const htmlContent = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- CỘT 2 -->
+                <!-- CỘT 2: TRUNG TÂM (Hòa Lưới GTI) -->
                 <div class="flex justify-center items-center">
                     <div id="block-gti" class="block-card w-full max-w-sm bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-2 border-cyan-500/60 rounded-[36px] p-6 text-center relative shadow-cyan-500/10">
                         <div class="inline-flex p-3.5 bg-cyan-500/20 text-cyan-400 rounded-2xl mb-2 border border-cyan-500/30">
@@ -303,7 +305,7 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
 
                 <!-- CỘT 3 -->
-                <div class="flex flex-col gap-10 justify-between items-center md:items-end">
+                <div class="flex flex-col justify-around h-full items-center md:items-end gap-6 md:gap-12">
                     <div id="block-grid" class="block-card w-full max-w-xs bg-slate-950/90 border-2 border-indigo-500/40 rounded-2xl p-4 relative">
                         <div class="flex items-center gap-3 border-b border-indigo-500/20 pb-2 mb-2.5">
                             <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl">
@@ -419,7 +421,7 @@ const htmlContent = `<!DOCTYPE html>
     <script>
         let historyDaysData = ${JSON.stringify(state.historyDays)};
         let chartInstance = null;
-        let particleProgress = { pv_mppt: 0, mppt_bat: 0, mppt_gti: 0, gti_load: 0, grid_load: 0 };
+        let particleProgress = { pv_mppt: 0, mppt_bat_charge: 0, mppt_bat_discharge: 0, mppt_gti: 0, gti_load: 0, grid_load: 0 };
 
         window.addEventListener('load', () => {
             updatePaths();
@@ -462,8 +464,8 @@ const htmlContent = `<!DOCTYPE html>
             } else {
                 chartDiv.classList.add('hidden');
                 tableDiv.classList.remove('hidden');
-                btnT.className = "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
-                btnC.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                btnT.className = "px-3.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
+                btnC.className = "px-3.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
             }
         }
 
@@ -546,13 +548,19 @@ const htmlContent = `<!DOCTYPE html>
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
             const loadTop = getBoxAnchor('block-load', 'top');
 
-            // Đường đi từ Sạc MPPT sang Hòa lưới (GTI) đổi thành đường thẳng trực tiếp (Direct)
-            setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + mpptRight.x + ' ' + mpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
+            // 2 đường nối riêng biệt cho Pin lưu trữ (1 dòng sạc lệch trái, 1 dòng xả lệch phải)
+            const batTopLeft = { x: batTop.x - 12, y: batTop.y };
+            const batTopRight = { x: batTop.x + 12, y: batTop.y };
+            const mpptBottomLeft = { x: mpptBottom.x - 12, y: mpptBottom.y };
+            const mpptBottomRight = { x: mpptBottom.x + 12, y: mpptBottom.y };
 
             setPathD('path-pv-mppt', 'guide-pv-mppt', 'M ' + pvBottom.x + ' ' + pvBottom.y + ' L ' + mpptTop.x + ' ' + mpptTop.y);
-            setPathD('path-mppt-bat', 'guide-mppt-bat', 'M ' + mpptBottom.x + ' ' + mpptBottom.y + ' L ' + batTop.x + ' ' + batTop.y);
+            setPathD('path-mppt-bat-charge', 'guide-mppt-bat-charge', 'M ' + mpptBottomLeft.x + ' ' + mpptBottomLeft.y + ' L ' + batTopLeft.x + ' ' + batTopLeft.y);
+            setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             
-            // Đường từ GTI sang Tải giữ bo cua nhẹ hoặc thẳng
+            // Đường thẳng ngang từ MPPT sang GTI
+            setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + mpptRight.x + ' ' + mpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
+
             const midXLoad = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
             setPathD('path-gti-load', 'guide-gti-load', 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + loadLeft.y + ' L ' + loadLeft.x + ' ' + loadLeft.y);
             
@@ -576,20 +584,28 @@ const htmlContent = `<!DOCTYPE html>
             const group = document.getElementById('particlesGroup');
             if (!group) return;
             group.innerHTML = '';
-            drawFlowingParticles('path-pv-mppt', '#f59e0b', 'pv_mppt');
-            drawFlowingParticles('path-mppt-bat', '#10b981', 'mppt_bat');
-            drawFlowingParticles('path-mppt-gti', '#06b6d4', 'mppt_gti');
-            drawFlowingParticles('path-gti-load', '#06b6d4', 'gti_load');
-            drawFlowingParticles('path-grid-load', '#6366f1', 'grid_load');
+            drawFlowingParticles('path-pv-mppt', '#f59e0b', 'pv_mppt', false);
+            drawFlowingParticles('path-mppt-bat-charge', '#10b981', 'mppt_bat_charge', false); // Xanh lá (Sạc)
+            drawFlowingParticles('path-mppt-bat-discharge', '#f97316', 'mppt_bat_discharge', true); // Cam (Xả)
+            drawFlowingParticles('path-mppt-gti', '#06b6d4', 'mppt_gti', false);
+            drawFlowingParticles('path-gti-load', '#06b6d4', 'gti_load', false);
+            drawFlowingParticles('path-grid-load', '#6366f1', 'grid_load', false);
         }
 
-        function drawFlowingParticles(pathId, color, progressKey) {
+        function drawFlowingParticles(pathId, color, progressKey, reverse) {
             const path = document.getElementById(pathId);
             if (!path) return;
             const pathLength = path.getTotalLength();
             if (pathLength === 0) return;
-            particleProgress[progressKey] += 0.002;
-            if (particleProgress[progressKey] > 1) particleProgress[progressKey] = 0;
+            
+            if (reverse) {
+                particleProgress[progressKey] -= 0.002;
+                if (particleProgress[progressKey] < 0) particleProgress[progressKey] = 1;
+            } else {
+                particleProgress[progressKey] += 0.002;
+                if (particleProgress[progressKey] > 1) particleProgress[progressKey] = 0;
+            }
+
             const group = document.getElementById('particlesGroup');
             for (let i = 0; i < 3; i++) {
                 let offset = (particleProgress[progressKey] + i * 0.33) % 1;
