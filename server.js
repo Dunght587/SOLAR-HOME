@@ -560,12 +560,15 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
-            // Dùng chung một trục dọc thẳng hàng cho cả Lưới và Bám tải chạy song song sát nhau xuống Tải
-            const sharedX = gridBottom.x;
-            const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + sharedX + ' ' + loadTop.y + ' L ' + loadTop.x + ' ' + loadTop.y;
+            // Hai đường độc lập chạy song song, định vị điểm đến tách biệt ở đỉnh Tải gia đình (chia đôi bề ngang khối Tải)
+            const loadLeftX = loadTop.x - 20;
+            const loadRightX = loadTop.x + 20;
+
+            const gridLoadPath = 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + gridBottom.x + ' ' + loadTop.y + ' L ' + loadLeftX + ' ' + loadTop.y;
             setPathD('path-grid-load', 'guide-grid-load', gridLoadPath);
 
-            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + sharedX + ' ' + gtiRight.y + ' L ' + sharedX + ' ' + loadTop.y + ' L ' + loadTop.x + ' ' + loadTop.y;
+            const parallelX = gridBottom.x - 15;
+            const gtiLoadPath = 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + parallelX + ' ' + gtiRight.y + ' L ' + parallelX + ' ' + loadTop.y + ' L ' + loadRightX + ' ' + loadTop.y;
             setPathD('path-gti-load', 'guide-gti-load', gtiLoadPath);
         }
 
