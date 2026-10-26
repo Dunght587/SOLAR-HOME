@@ -27,7 +27,6 @@ let state = {
   loadPower: 212.33,
   loadKwh: 2.10,
   savingsVnd: 6448,
-  // Lịch sử tháng chi tiết cho Tab Lịch sử
   historyDays: [
     { date: "01/10", discharge: 3.5, grid: 9.22, load: 12.72 },
     { date: "02/10", discharge: 2.82, grid: 10.59, load: 13.41 },
@@ -359,23 +358,27 @@ const htmlContent = `<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Tóm tắt số liệu -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <!-- Tóm tắt số liệu 5 ô (Bổ sung Tổng tiêu thụ) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <span class="text-xs text-slate-400 block mb-1">Tổng năng lượng hòa (xả)</span>
-                <span id="sum-discharge" class="text-lg font-black text-cyan-400">64.5 kWh</span>
+                <span id="sum-discharge" class="text-base lg:text-lg font-black text-cyan-400">0 kWh</span>
             </div>
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <span class="text-xs text-slate-400 block mb-1">Tổng lấy lưới</span>
-                <span id="sum-grid" class="text-lg font-black text-amber-400">156.46 kWh</span>
+                <span id="sum-grid" class="text-base lg:text-lg font-black text-amber-400">0 kWh</span>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <span class="text-xs text-slate-400 block mb-1">Tổng tiêu thụ</span>
+                <span id="sum-load" class="text-base lg:text-lg font-black text-purple-400">0 kWh</span>
             </div>
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <span class="text-xs text-slate-400 block mb-1">Tiết kiệm ước tính</span>
-                <span id="sum-saving" class="text-lg font-black text-emerald-400">179.764 đ</span>
+                <span id="sum-saving" class="text-base lg:text-lg font-black text-emerald-400">0 đ</span>
             </div>
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 col-span-2 sm:col-span-1">
                 <span class="text-xs text-slate-400 block mb-1">% Hòa lưới / Tổng tải</span>
-                <span id="sum-ratio" class="text-lg font-black text-purple-400">29.18%</span>
+                <span id="sum-ratio" class="text-base lg:text-lg font-black text-indigo-400">0%</span>
             </div>
         </div>
 
@@ -469,16 +472,34 @@ const htmlContent = `<!DOCTYPE html>
         }
 
         function initHistoryTableAndChart() {
+            let totalDischarge = 0;
+            let totalGrid = 0;
+            let totalLoad = 0;
+
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
             historyDaysData.forEach(item => {
+                totalDischarge += item.discharge;
+                totalGrid += item.grid;
+                totalLoad += item.load;
+
                 tbody.innerHTML += '<tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">' +
                     '<td class="py-3 px-4 font-bold text-slate-200">' + item.date + '</td>' +
-                    '<td class="py-3 px-4 text-cyan-400 font-bold">' + item.discharge + '</td>' +
-                    '<td class="py-3 px-4 text-amber-400 font-bold">' + item.grid + '</td>' +
-                    '<td class="py-3 px-4 text-purple-400 font-bold">' + item.load + '</td>' +
+                    '<td class="py-3 px-4 text-cyan-400 font-bold">' + item.discharge.toFixed(2) + '</td>' +
+                    '<td class="py-3 px-4 text-amber-400 font-bold">' + item.grid.toFixed(2) + '</td>' +
+                    '<td class="py-3 px-4 text-purple-400 font-bold">' + item.load.toFixed(2) + '</td>' +
                 '</tr>';
             });
+
+            document.getElementById('sum-discharge').innerText = totalDischarge.toFixed(2) + ' kWh';
+            document.getElementById('sum-grid').innerText = totalGrid.toFixed(2) + ' kWh';
+            document.getElementById('sum-load').innerText = totalLoad.toFixed(2) + ' kWh';
+            
+            const saving = Math.round(totalDischarge * 2800);
+            document.getElementById('sum-saving').innerText = saving.toLocaleString('vi-VN') + ' đ';
+
+            const ratio = totalLoad > 0 ? ((totalDischarge / totalLoad) * 100).toFixed(2) : 0;
+            document.getElementById('sum-ratio').innerText = ratio + '%';
 
             const ctx = document.getElementById('historyChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
