@@ -196,7 +196,7 @@ const htmlContent = `<!DOCTYPE html>
             </svg>
 
             <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-y-10 md:gap-x-16 items-center">
-                <!-- CỘT 1: Căn chỉnh chiều cao đồng đều để MPPT thẳng hàng ngang với GTI -->
+                <!-- CỘT 1 -->
                 <div class="flex flex-col justify-around h-full items-center md:items-start gap-6 md:gap-12">
                     <div id="block-pv" class="block-card w-full max-w-xs bg-slate-950/90 border-2 border-amber-500/40 rounded-2xl p-4 relative">
                         <div class="flex items-center gap-3 border-b border-amber-500/20 pb-2 mb-2.5">
@@ -276,7 +276,7 @@ const htmlContent = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- CỘT 2: TRUNG TÂM (Hòa Lưới GTI) -->
+                <!-- CỘT 2: TRUNG TÂM -->
                 <div class="flex justify-center items-center">
                     <div id="block-gti" class="block-card w-full max-w-sm bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-2 border-cyan-500/60 rounded-[36px] p-6 text-center relative shadow-cyan-500/10">
                         <div class="inline-flex p-3.5 bg-cyan-500/20 text-cyan-400 rounded-2xl mb-2 border border-cyan-500/30">
@@ -464,8 +464,8 @@ const htmlContent = `<!DOCTYPE html>
             } else {
                 chartDiv.classList.add('hidden');
                 tableDiv.classList.remove('hidden');
-                btnT.className = "px-3.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
-                btnC.className = "px-3.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                btnT.className = "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 transition";
+                btnC.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
             }
         }
 
@@ -548,7 +548,10 @@ const htmlContent = `<!DOCTYPE html>
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
             const loadTop = getBoxAnchor('block-load', 'top');
 
-            // 2 đường nối riêng biệt cho Pin lưu trữ (1 dòng sạc lệch trái, 1 dòng xả lệch phải)
+            // Ép tọa độ Y của MPPT right trùng khớp tuyệt đối với GTI left để tạo đường thẳng ngang 100%
+            const targetY = gtiLeft.y;
+            const fixedMpptRight = { x: mpptRight.x, y: targetY };
+
             const batTopLeft = { x: batTop.x - 12, y: batTop.y };
             const batTopRight = { x: batTop.x + 12, y: batTop.y };
             const mpptBottomLeft = { x: mpptBottom.x - 12, y: mpptBottom.y };
@@ -558,8 +561,8 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-mppt-bat-charge', 'guide-mppt-bat-charge', 'M ' + mpptBottomLeft.x + ' ' + mpptBottomLeft.y + ' L ' + batTopLeft.x + ' ' + batTopLeft.y);
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             
-            // Đường thẳng ngang từ MPPT sang GTI
-            setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + mpptRight.x + ' ' + mpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
+            // Đường thẳng ngang tuyệt đối từ MPPT sang GTI
+            setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
             const midXLoad = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
             setPathD('path-gti-load', 'guide-gti-load', 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + loadLeft.y + ' L ' + loadLeft.x + ' ' + loadLeft.y);
@@ -585,8 +588,8 @@ const htmlContent = `<!DOCTYPE html>
             if (!group) return;
             group.innerHTML = '';
             drawFlowingParticles('path-pv-mppt', '#f59e0b', 'pv_mppt', false);
-            drawFlowingParticles('path-mppt-bat-charge', '#10b981', 'mppt_bat_charge', false); // Xanh lá (Sạc)
-            drawFlowingParticles('path-mppt-bat-discharge', '#f97316', 'mppt_bat_discharge', true); // Cam (Xả)
+            drawFlowingParticles('path-mppt-bat-charge', '#10b981', 'mppt_bat_charge', false);
+            drawFlowingParticles('path-mppt-bat-discharge', '#f97316', 'mppt_bat_discharge', true);
             drawFlowingParticles('path-mppt-gti', '#06b6d4', 'mppt_gti', false);
             drawFlowingParticles('path-gti-load', '#06b6d4', 'gti_load', false);
             drawFlowingParticles('path-grid-load', '#6366f1', 'grid_load', false);
