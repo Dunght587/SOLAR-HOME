@@ -358,7 +358,6 @@ const htmlContent = `<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Tóm tắt số liệu 5 ô (Bổ sung Tổng tiêu thụ) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <span class="text-xs text-slate-400 block mb-1">Tổng năng lượng hòa (xả)</span>
@@ -382,7 +381,6 @@ const htmlContent = `<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Chuyển đổi Biểu đồ / Bảng -->
         <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 md:p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -394,12 +392,10 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- View Biểu Đồ -->
             <div id="view-chart-container" class="h-72">
                 <canvas id="historyChart"></canvas>
             </div>
 
-            <!-- View Bảng -->
             <div id="view-table-container" class="hidden overflow-x-auto max-h-80">
                 <table class="w-full text-left text-xs text-slate-300">
                     <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
@@ -538,14 +534,6 @@ const htmlContent = `<!DOCTYPE html>
             return { x, y };
         }
 
-        function generateOrthogonalPath(start, end, mode) {
-            if (mode === 'horizontal-first') {
-                const midX = start.x + (end.x - start.x) / 2;
-                return 'M ' + start.x + ' ' + start.y + ' L ' + midX + ' ' + start.y + ' L ' + midX + ' ' + end.y + ' L ' + end.x + ' ' + end.y;
-            }
-            return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
-        }
-
         function updatePaths() {
             const pvBottom = getBoxAnchor('block-pv', 'bottom');
             const mpptTop = getBoxAnchor('block-mppt', 'top');
@@ -558,11 +546,17 @@ const htmlContent = `<!DOCTYPE html>
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
             const loadTop = getBoxAnchor('block-load', 'top');
 
-            setPathD('path-pv-mppt', 'guide-pv-mppt', generateOrthogonalPath(pvBottom, mpptTop, 'direct'));
-            setPathD('path-mppt-bat', 'guide-mppt-bat', generateOrthogonalPath(mpptBottom, batTop, 'direct'));
-            setPathD('path-mppt-gti', 'guide-mppt-gti', generateOrthogonalPath(mpptRight, gtiLeft, 'horizontal-first'));
-            setPathD('path-gti-load', 'guide-gti-load', generateOrthogonalPath(gtiRight, loadLeft, 'horizontal-first'));
-            setPathD('path-grid-load', 'guide-grid-load', generateOrthogonalPath(gridBottom, loadTop, 'direct'));
+            // Đường đi từ Sạc MPPT sang Hòa lưới (GTI) đổi thành đường thẳng trực tiếp (Direct)
+            setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + mpptRight.x + ' ' + mpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
+
+            setPathD('path-pv-mppt', 'guide-pv-mppt', 'M ' + pvBottom.x + ' ' + pvBottom.y + ' L ' + mpptTop.x + ' ' + mpptTop.y);
+            setPathD('path-mppt-bat', 'guide-mppt-bat', 'M ' + mpptBottom.x + ' ' + mpptBottom.y + ' L ' + batTop.x + ' ' + batTop.y);
+            
+            // Đường từ GTI sang Tải giữ bo cua nhẹ hoặc thẳng
+            const midXLoad = gtiRight.x + (loadLeft.x - gtiRight.x) / 2;
+            setPathD('path-gti-load', 'guide-gti-load', 'M ' + gtiRight.x + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + gtiRight.y + ' L ' + midXLoad + ' ' + loadLeft.y + ' L ' + loadLeft.x + ' ' + loadLeft.y);
+            
+            setPathD('path-grid-load', 'guide-grid-load', 'M ' + gridBottom.x + ' ' + gridBottom.y + ' L ' + loadTop.x + ' ' + loadTop.y);
         }
 
         function setPathD(mainId, guideId, d) {
