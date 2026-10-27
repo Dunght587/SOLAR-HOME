@@ -35,13 +35,19 @@ const mqttClient = mqtt.connect('mqtts://giabao-inverter.com:8883', {
   clientId: 'render_bridge_' + Math.random().toString(16).substr(2, 6),
   username: 'ha_T19aqEpG',
   password: 'KRpymsEADJmAEGtj',
-  rejectUnauthorized: false
+  rejectUnauthorized: false,
+  reconnectPeriod: 5000,
+  connectTimeout: 30100
 });
 
 mqttClient.on('connect', () => {
   console.log('Đã kết nối thành công tới MQTT Broker Gia Bảo!');
   mqttClient.subscribe('inverter_ha/T19aqEpGyGA6RRNEzP2TfhCGbd2/#', (err) => {
-    if (!err) console.log('Đã subscribe topic inverter thành công');
+    if (!err) {
+      console.log('Đã subscribe topic inverter thành công');
+    } else {
+      console.error('Lỗi subscribe topic:', err);
+    }
   });
 });
 
@@ -49,6 +55,10 @@ mqttClient.on('message', (topic, payload) => {
   try {
     const msg = payload.toString();
     console.log(`[MQTT] Topic: ${topic} | Data: ${msg}`);
+
+    // Parse dữ liệu thực tế từ hãng nếu có cấu trúc JSON tại đây
+    // const data = JSON.parse(msg);
+    // Object.assign(state, data);
 
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
@@ -61,11 +71,15 @@ mqttClient.on('message', (topic, payload) => {
 });
 
 mqttClient.on('error', (err) => {
-  console.error('LỖI KẾT NỐI MQTT:', err.message);
+  console.error('LỖI KẾT NỐI MQTT CHI TIẾT:', err.message);
 });
 
 mqttClient.on('offline', () => {
   console.log('MQTT Client đang ngoại tuyến (offline)');
+});
+
+mqttClient.on('reconnect', () => {
+  console.log('Đang thử kết nối lại với MQTT Broker...');
 });
 // ---------------------------------------
 
