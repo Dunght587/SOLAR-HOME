@@ -40,11 +40,8 @@ const mqttClient = mqtt.connect('mqtts://giabao-inverter.com:8883', {
 
 mqttClient.on('connect', () => {
   console.log('Đã kết nối thành công tới MQTT Broker Gia Bảo!');
-  // Đăng ký nhận dữ liệu từ thiết bị của bác
   mqttClient.subscribe('inverter_ha/T19aqEpGyGA6RRNEzP2TfhCGbd2/#', (err) => {
-    if (!err) {
-      console.log('Đã subscribe topic inverter thành công');
-    }
+    if (!err) console.log('Đã subscribe topic inverter thành công');
   });
 });
 
@@ -52,12 +49,7 @@ mqttClient.on('message', (topic, payload) => {
   try {
     const msg = payload.toString();
     console.log(`[MQTT] Topic: ${topic} | Data: ${msg}`);
-    
-    // Tùy theo cấu trúc tin nhắn MQTT gửi về từ hãng, bác có thể map vào các thông số trong state ở đây.
-    // Ví dụ nếu hãng gửi giá trị công suất bám tải:
-    // if (topic.includes('gti_power')) { state.gtiPower = parseFloat(msg); }
 
-    // Phát dữ liệu cập nhật qua WebSocket tới giao diện web đang mở
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(state));
@@ -74,7 +66,7 @@ const htmlContent = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Monitoring Dashboard - Dunght (Cloud MQTT)</title>
+    <title>Solar Monitoring Dashboard - Dunght</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -84,10 +76,6 @@ const htmlContent = `<!DOCTYPE html>
         .block-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); }
         .block-card:hover { transform: translateY(-3px); box-shadow: 0 20px 35px -10px rgba(6, 182, 212, 0.15); }
         .flow-path-bg { stroke: #1e293b; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .flow-path-guide { stroke: #334155; stroke-width: 2; fill: none; stroke-dasharray: 4 4; stroke-linecap: round; stroke-linejoin: round; }
-        .energy-particle { filter: drop-shadow(0px 0px 4px currentColor); transition: opacity 0.3s ease; }
-        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin-slow { animation: spinSlow 20s linear infinite; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #090d16; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -130,6 +118,7 @@ const htmlContent = `<!DOCTYPE html>
         </div>
     </header>
 
+    <!-- TAB REALTIME -->
     <main id="realtimeView" class="container mx-auto p-4 md:p-6 flex-1 flex flex-col justify-center items-center">
         <div class="w-full max-w-6xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-4">
             <div class="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-3 flex flex-col justify-between backdrop-blur-md">
@@ -172,16 +161,12 @@ const htmlContent = `<!DOCTYPE html>
         <div class="relative w-full max-w-6xl bg-slate-900/50 rounded-3xl border border-slate-800/80 p-6 md:p-10 my-2 backdrop-blur-md overflow-hidden shadow-2xl">
             <svg id="svgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0">
                 <path id="path-pv-mppt" class="flow-path-bg"></path>
-                <path id="path-mppt-bat-charge" class="flow-path-bg"></path>
-                <path id="path-mppt-bat-discharge" class="flow-path-bg"></path>
-                <path id="path-mppt-gti" class="flow-path-bg"></path>
                 <path id="path-gti-load" class="flow-path-bg"></path>
                 <path id="path-grid-load" class="flow-path-bg"></path>
-                <g id="particlesGroup"></g>
             </svg>
 
             <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-y-10 md:gap-x-16 items-center">
-                <div class="flex flex-col justify-around h-full items-center md:items-start gap-6 md:gap-12">
+                <div class="flex flex-col justify-around h-full items-center md:items-start gap-6">
                     <div id="block-pv" class="block-card w-full max-w-xs bg-slate-950/90 border-2 border-amber-500/40 rounded-2xl p-4">
                         <h3 class="font-bold text-amber-300 text-sm">PIN NĂNG LƯỢNG (PV)</h3>
                         <p class="text-amber-400 font-extrabold text-base" id="text-pvPower">177 W</p>
@@ -202,7 +187,7 @@ const htmlContent = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <div class="flex flex-col justify-around h-full items-center md:items-end gap-6 md:gap-12">
+                <div class="flex flex-col justify-around h-full items-center md:items-end gap-6">
                     <div id="block-grid" class="block-card w-full max-w-xs bg-slate-950/90 border-2 border-indigo-500/40 rounded-2xl p-4">
                         <h3 class="font-bold text-indigo-300 text-sm">LƯỚI ĐIỆN</h3>
                         <p class="text-indigo-400 font-extrabold text-base" id="text-gridPower">0 W</p>
@@ -216,8 +201,37 @@ const htmlContent = `<!DOCTYPE html>
         </div>
     </main>
 
+    <!-- TAB LỊCH SỬ -->
+    <main id="historyView" class="container mx-auto p-4 md:p-6 flex-1 hidden">
+        <div class="max-w-6xl mx-auto bg-slate-900/80 border border-slate-800 rounded-3xl p-6 backdrop-blur-md">
+            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-chart-bar mr-2 text-emerald-400"></i> Thống kê sản lượng & Lịch sử</h2>
+            <div class="h-64 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-2xl">
+                Biểu đồ lịch sử đang cập nhật từ hệ thống Cloud...
+            </div>
+        </div>
+    </main>
+
     <script>
-        // Kết nối WebSocket nhận dữ liệu real-time từ Render Server
+        function switchTab(tab) {
+            const realtimeView = document.getElementById('realtimeView');
+            const historyView = document.getElementById('historyView');
+            const realtimeBtn = document.getElementById('tabRealtimeBtn');
+            const historyBtn = document.getElementById('tabHistoryBtn');
+
+            if (tab === 'realtime') {
+                realtimeView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+                realtimeBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow-md";
+                historyBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                updatePaths();
+            } else {
+                realtimeView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                historyBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow-md";
+                realtimeBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+            }
+        }
+
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const ws = new WebSocket(wsProtocol + '//' + window.location.host);
 
