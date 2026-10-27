@@ -26,35 +26,7 @@ let state = {
   gridKwh: 0.00,
   loadPower: 212.33,
   loadKwh: 2.10,
-  savingsVnd: 6448,
-  historyDays: [
-    { date: "01/10", discharge: 3.5, grid: 9.22, load: 12.72 },
-    { date: "02/10", discharge: 2.82, grid: 10.59, load: 13.41 },
-    { date: "03/10", discharge: 2.52, grid: 5.39, load: 7.91 },
-    { date: "04/10", discharge: 1.77, grid: 5.72, load: 7.48 },
-    { date: "05/10", discharge: 2.39, grid: 5.78, load: 8.17 },
-    { date: "06/10", discharge: 2.59, grid: 5.17, load: 7.77 },
-    { date: "07/10", discharge: 2.28, grid: 5.45, load: 7.74 },
-    { date: "08/10", discharge: 2.32, grid: 4.66, load: 6.98 },
-    { date: "09/10", discharge: 2.55, grid: 5.55, load: 8.1 },
-    { date: "10/10", discharge: 2.26, grid: 4.28, load: 6.55 },
-    { date: "11/10", discharge: 2.7, grid: 5.12, load: 7.82 },
-    { date: "12/10", discharge: 2.96, grid: 7.0, load: 9.97 },
-    { date: "13/10", discharge: 2.3, grid: 6.86, load: 9.16 },
-    { date: "14/10", discharge: 2.48, grid: 5.49, load: 7.97 },
-    { date: "15/10", discharge: 2.55, grid: 5.23, load: 7.78 },
-    { date: "16/10", discharge: 2.57, grid: 5.59, load: 8.17 },
-    { date: "17/10", discharge: 2.44, grid: 5.5, load: 7.93 },
-    { date: "18/10", discharge: 2.71, grid: 6.2, load: 8.91 },
-    { date: "19/10", discharge: 2.63, grid: 6.36, load: 8.99 },
-    { date: "20/10", discharge: 2.45, grid: 6.53, load: 8.98 },
-    { date: "21/10", discharge: 2.51, grid: 5.32, load: 7.84 },
-    { date: "22/10", discharge: 2.33, grid: 7.78, load: 10.11 },
-    { date: "23/10", discharge: 2.45, grid: 5.77, load: 8.22 },
-    { date: "24/10", discharge: 2.64, grid: 5.29, load: 7.93 },
-    { date: "25/10", discharge: 2.23, grid: 8.14, load: 10.37 },
-    { date: "26/10", discharge: 1.54, grid: 2.45, load: 3.99 }
-  ]
+  savingsVnd: 6448
 };
 
 const htmlContent = `<!DOCTYPE html>
@@ -62,7 +34,7 @@ const htmlContent = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Monitoring Dashboard - Dunght</title>
+    <title>Solar Monitoring Dashboard - Dunght (Cloud)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -113,7 +85,7 @@ const htmlContent = `<!DOCTYPE html>
                 <i class="fa-solid fa-piggy-bank text-emerald-400 text-lg"></i>
                 <div class="text-left">
                     <span class="text-[10px] text-slate-400 block uppercase font-medium">Tiết kiệm hôm nay</span>
-                    <span class="text-xs font-bold text-emerald-400">6.448 đ</span>
+                    <span id="header-savings" class="text-xs font-bold text-emerald-400">6.448 đ</span>
                 </div>
             </div>
 
@@ -122,7 +94,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
-                <span class="text-xs font-semibold text-emerald-400">ONLINE</span>
+                <span id="cloud-status" class="text-xs font-semibold text-emerald-400">CLOUD ACTIVE</span>
             </div>
         </div>
     </header>
@@ -135,8 +107,8 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thu PV</span>
                     <i class="fa-solid fa-sun text-sm"></i>
                 </div>
-                <div class="text-base md:text-lg font-black text-amber-400">177 W</div>
-                <span class="text-[9px] text-slate-500">Hôm nay: 2.579 kWh</span>
+                <div id="top-pv-power" class="text-base md:text-lg font-black text-amber-400">177 W</div>
+                <span id="top-pv-kwh" class="text-[9px] text-slate-500">Hôm nay: 2.579 kWh</span>
             </div>
 
             <div class="bg-slate-900/80 border border-purple-500/30 rounded-2xl p-3 flex flex-col justify-between backdrop-blur-md">
@@ -144,7 +116,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tiêu Thụ</span>
                     <i class="fa-solid fa-house-crack text-sm"></i>
                 </div>
-                <div class="text-base md:text-lg font-black text-purple-400">212 W</div>
+                <div id="top-load-power" class="text-base md:text-lg font-black text-purple-400">212 W</div>
                 <span class="text-[9px] text-slate-500">Tải gia đình</span>
             </div>
 
@@ -153,7 +125,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hòa Lưới</span>
                     <i class="fa-solid fa-plug-circle-bolt text-sm"></i>
                 </div>
-                <div class="text-base md:text-lg font-black text-cyan-400">0 W</div>
+                <div id="top-gti-power" class="text-base md:text-lg font-black text-cyan-400">0 W</div>
                 <span class="text-[9px] text-slate-500">GTI Bám tải</span>
             </div>
 
@@ -162,7 +134,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lấy Lưới</span>
                     <i class="fa-solid fa-tower-cell text-sm"></i>
                 </div>
-                <div class="text-base md:text-lg font-black text-indigo-400">12 W</div>
+                <div id="top-grid-power" class="text-base md:text-lg font-black text-indigo-400">12 W</div>
                 <span class="text-[9px] text-slate-500">EVN bù vào</span>
             </div>
 
@@ -171,7 +143,7 @@ const htmlContent = `<!DOCTYPE html>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tiền Tiết Kiệm</span>
                     <i class="fa-solid fa-piggy-bank text-sm"></i>
                 </div>
-                <div class="text-base md:text-lg font-black text-emerald-400">6.448 đ</div>
+                <div id="top-savings" class="text-base md:text-lg font-black text-emerald-400">6.448 đ</div>
                 <span class="text-[9px] text-slate-500">Tạm tính hôm nay</span>
             </div>
         </div>
@@ -211,16 +183,16 @@ const htmlContent = `<!DOCTYPE html>
                         <div class="grid grid-cols-2 gap-2 text-center mb-2">
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">ĐIỆN ÁP</span>
-                                <span class="font-extrabold text-amber-400 text-sm">130.3 V</span>
+                                <span id="pv-volts" class="font-extrabold text-amber-400 text-sm">130.3 V</span>
                             </div>
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">DÒNG PV</span>
-                                <span class="font-extrabold text-amber-400 text-sm">1.4 A</span>
+                                <span id="pv-amps" class="font-extrabold text-amber-400 text-sm">1.4 A</span>
                             </div>
                         </div>
                         <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2 text-center">
                             <span class="text-[9px] text-amber-300 block font-bold uppercase">Công Suất Thu PV</span>
-                            <span class="font-black text-amber-400 text-base">177 W</span>
+                            <span id="pv-power" class="font-black text-amber-400 text-base">177 W</span>
                         </div>
                     </div>
 
@@ -231,22 +203,22 @@ const htmlContent = `<!DOCTYPE html>
                             </div>
                             <div>
                                 <h3 class="font-bold text-emerald-300 text-sm tracking-wide">SẠC MPPT</h3>
-                                <p class="text-[10px] text-slate-400">Nhiệt độ: 34°C | Đang Sạc</p>
+                                <p id="mppt-temp" class="text-[10px] text-slate-400">Nhiệt độ: 34°C | Đang Sạc</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-center mb-2">
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">DÒNG SẠC</span>
-                                <span class="font-extrabold text-emerald-400 text-sm">5.8 A</span>
+                                <span id="mppt-amps" class="font-extrabold text-emerald-400 text-sm">5.8 A</span>
                             </div>
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">CÔNG SUẤT</span>
-                                <span class="font-extrabold text-emerald-400 text-sm">177 W</span>
+                                <span id="mppt-power" class="font-extrabold text-emerald-400 text-sm">177 W</span>
                             </div>
                         </div>
                         <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2 text-center">
                             <span class="text-[9px] text-emerald-300 block font-bold uppercase">Sản Lượng Hôm Nay</span>
-                            <span class="font-black text-emerald-400 text-base">2.579 kWh</span>
+                            <span id="mppt-kwh" class="font-black text-emerald-400 text-base">2.579 kWh</span>
                         </div>
                     </div>
 
@@ -257,21 +229,21 @@ const htmlContent = `<!DOCTYPE html>
                             </div>
                             <div>
                                 <h3 class="font-bold text-cyan-300 text-sm tracking-wide">PIN LƯU TRỮ</h3>
-                                <p class="text-[10px] text-slate-400">Mức SOC: 74%</p>
+                                <p id="bat-soc-text" class="text-[10px] text-slate-400">Mức SOC: 74%</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-center mb-2">
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">ĐIỆN ÁP</span>
-                                <span class="font-extrabold text-cyan-400 text-sm">28.0 V</span>
+                                <span id="bat-volts" class="font-extrabold text-cyan-400 text-sm">28.0 V</span>
                             </div>
                             <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
                                 <span class="text-[9px] text-slate-400 block font-medium">DÒNG XẢ</span>
-                                <span class="font-extrabold text-cyan-400 text-sm">8.10 A</span>
+                                <span id="bat-amps" class="font-extrabold text-cyan-400 text-sm">8.10 A</span>
                             </div>
                         </div>
                         <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full w-[74%]"></div>
+                            <div id="bat-soc-bar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full w-[74%]"></div>
                         </div>
                     </div>
                 </div>
@@ -283,17 +255,17 @@ const htmlContent = `<!DOCTYPE html>
                             <i class="fa-solid fa-microchip text-3xl animate-pulse"></i>
                         </div>
                         <h3 class="font-extrabold text-cyan-300 text-base tracking-wide">GTIControl807</h3>
-                        <p class="text-xs text-slate-400 mb-3">Hòa Lưới Bám Tải | Mosfet: 45°C</p>
+                        <p id="gti-temp-status" class="text-xs text-slate-400 mb-3">Hòa Lưới Bám Tải | Mosfet: 45°C</p>
 
                         <div class="space-y-2">
                             <div class="bg-slate-950/90 p-3 rounded-2xl border border-slate-800 flex justify-between items-center px-4">
                                 <span class="text-xs text-slate-400 font-medium">CÔNG SUẤT XẢ</span>
-                                <span class="font-extrabold text-cyan-400 text-lg">212.86 W</span>
+                                <span id="gti-power" class="font-extrabold text-cyan-400 text-lg">212.86 W</span>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="bg-slate-950/90 p-2 rounded-xl border border-slate-800">
                                     <span class="text-[9px] text-slate-400 block font-medium">ĐIỆN ÁP TẦN SỐ</span>
-                                    <span class="font-bold text-slate-200 text-xs">236.53V - 49.75Hz</span>
+                                    <span id="gti-volts-freq" class="font-bold text-slate-200 text-xs">236.53V - 49.75Hz</span>
                                 </div>
                                 <div class="bg-slate-950/90 p-2 rounded-xl border border-slate-800">
                                     <span class="text-[9px] text-slate-400 block font-medium">ĐIỆN ÁP NGẮT</span>
@@ -313,12 +285,12 @@ const htmlContent = `<!DOCTYPE html>
                             </div>
                             <div>
                                 <h3 class="font-bold text-indigo-300 text-sm tracking-wide">LƯỚI ĐIỆN QUỐC GIA</h3>
-                                <p class="text-[10px] text-slate-400">EVN Grid 236V</p>
+                                <p id="grid-volts-text" class="text-[10px] text-slate-400">EVN Grid 236V</p>
                             </div>
                         </div>
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800 text-center">
                             <span class="text-[9px] text-slate-400 block font-medium">LẤY LƯỚI TỨC THỜI</span>
-                            <span class="font-extrabold text-indigo-400 text-sm">12.24 W</span>
+                            <span id="grid-power" class="font-extrabold text-indigo-400 text-sm">0 W</span>
                         </div>
                     </div>
 
@@ -334,7 +306,7 @@ const htmlContent = `<!DOCTYPE html>
                         </div>
                         <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800 text-center">
                             <span class="text-[9px] text-slate-400 block font-medium">TỔNG TẢI THỜI GIAN THỰC</span>
-                            <span class="font-extrabold text-purple-400 text-sm">212.33 W</span>
+                            <span id="load-power" class="font-extrabold text-purple-400 text-sm">212.33 W</span>
                         </div>
                     </div>
                 </div>
@@ -415,11 +387,58 @@ const htmlContent = `<!DOCTYPE html>
     </main>
 
     <footer class="bg-slate-950 border-t border-slate-800/80 text-center py-2.5 text-[11px] text-slate-500">
-        Solar Monitoring Dashboard &copy; 2026 - Dunght | GTIControl807 & MPPT CHG1077773
+        Solar Monitoring Dashboard (Cloud Firebase) &copy; 2026 - Dunght | GTIControl807 & MPPT CHG1077773
     </footer>
 
-    <script>
-        let historyDaysData = ${JSON.stringify(state.historyDays)};
+    <!-- Tích hợp Firebase SDK v10 & Lắng nghe Realtime Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Cấu hình Firebase dự án 'hoa-luoi' của bác
+        const firebaseConfig = {
+          apiKey: "AIzaSyBwzNwC7nBrDaqAZkrZU80CPO6scBQqP2Q",
+          authDomain: "hoa-luoi.firebaseapp.com",
+          databaseURL: "https://hoa-luoi-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "hoa-luoi",
+          storageBucket: "hoa-luoi.firebasestorage.app",
+          messagingSenderId: "709748326355",
+          appId: "1:709748326355:web:da0b974335a4052b5df926",
+          measurementId: "G-W2LZ6ZCWCC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const historyDaysData = [
+            { date: "01/10", discharge: 3.5, grid: 9.22, load: 12.72 },
+            { date: "02/10", discharge: 2.82, grid: 10.59, load: 13.41 },
+            { date: "03/10", discharge: 2.52, grid: 5.39, load: 7.91 },
+            { date: "04/10", discharge: 1.77, grid: 5.72, load: 7.48 },
+            { date: "05/10", discharge: 2.39, grid: 5.78, load: 8.17 },
+            { date: "06/10", discharge: 2.59, grid: 5.17, load: 7.77 },
+            { date: "07/10", discharge: 2.28, grid: 5.45, load: 7.74 },
+            { date: "08/10", discharge: 2.32, grid: 4.66, load: 6.98 },
+            { date: "09/10", discharge: 2.55, grid: 5.55, load: 8.1 },
+            { date: "10/10", discharge: 2.26, grid: 4.28, load: 6.55 },
+            { date: "11/10", discharge: 2.7, grid: 5.12, load: 7.82 },
+            { date: "12/10", discharge: 2.96, grid: 7.0, load: 9.97 },
+            { date: "13/10", discharge: 2.3, grid: 6.86, load: 9.16 },
+            { date: "14/10", discharge: 2.48, grid: 5.49, load: 7.97 },
+            { date: "15/10", discharge: 2.55, grid: 5.23, load: 7.78 },
+            { date: "16/10", discharge: 2.57, grid: 5.59, load: 8.17 },
+            { date: "17/10", discharge: 2.44, grid: 5.5, load: 7.93 },
+            { date: "18/10", discharge: 2.71, grid: 6.2, load: 8.91 },
+            { date: "19/10", discharge: 2.63, grid: 6.36, load: 8.99 },
+            { date: "20/10", discharge: 2.45, grid: 6.53, load: 8.98 },
+            { date: "21/10", discharge: 2.51, grid: 5.32, load: 7.84 },
+            { date: "22/10", discharge: 2.33, grid: 7.78, load: 10.11 },
+            { date: "23/10", discharge: 2.45, grid: 5.77, load: 8.22 },
+            { date: "24/10", discharge: 2.64, grid: 5.29, load: 7.93 },
+            { date: "25/10", discharge: 2.23, grid: 8.14, load: 10.37 },
+            { date: "26/10", discharge: 1.54, grid: 2.45, load: 3.99 }
+        ];
+
         let chartInstance = null;
         let particleProgress = { pv_mppt: 0, mppt_bat_charge: 0, mppt_bat_discharge: 0, mppt_gti: 0, gti_load: 0, grid_load: 0 };
 
@@ -427,10 +446,77 @@ const htmlContent = `<!DOCTYPE html>
             updatePaths();
             startAnimation();
             initHistoryTableAndChart();
+            listenFirebaseData();
         });
         window.addEventListener('resize', updatePaths);
 
-        function switchTab(tab) {
+        function listenFirebaseData() {
+            const statusEl = document.getElementById('cloud-status');
+            
+            onSnapshot(doc(db, "solar_realtime", "status"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    statusEl.innerText = "CLOUD ACTIVE";
+                    statusEl.className = "text-xs font-semibold text-emerald-400";
+                    updateDashboardUI(data);
+                } else {
+                    statusEl.innerText = "NO DATA";
+                    statusEl.className = "text-xs font-semibold text-amber-400";
+                }
+            }, (error) => {
+                console.error("Lỗi Firestore:", error);
+                statusEl.innerText = "MẤT KẾT NỐI";
+                statusEl.className = "text-xs font-semibold text-red-400";
+            });
+        }
+
+        function updateDashboardUI(d) {
+            if (d.pvPower !== undefined) {
+                document.getElementById('top-pv-power').innerText = d.pvPower + ' W';
+                document.getElementById('pv-power').innerText = d.pvPower + ' W';
+            }
+            if (d.pvVolts !== undefined) document.getElementById('pv-volts').innerText = d.pvVolts + ' V';
+            if (d.pvAmps !== undefined) document.getElementById('pv-amps').innerText = d.pvAmps + ' A';
+            if (d.pvKwh !== undefined) document.getElementById('top-pv-kwh').innerText = 'Hôm nay: ' + d.pvKwh + ' kWh';
+
+            if (d.mpptPower !== undefined) document.getElementById('mppt-power').innerText = d.mpptPower + ' W';
+            if (d.mpptAmps !== undefined) document.getElementById('mppt-amps').innerText = d.mpptAmps + ' A';
+            if (d.mpptKwh !== undefined) document.getElementById('mppt-kwh').innerText = d.mpptKwh + ' kWh';
+            if (d.mpptTemp !== undefined) document.getElementById('mppt-temp').innerText = 'Nhiệt độ: ' + d.mpptTemp + '°C | Đang Sạc';
+
+            if (d.batVolts !== undefined) document.getElementById('bat-volts').innerText = d.batVolts + ' V';
+            if (d.batAmps !== undefined) document.getElementById('bat-amps').innerText = d.batAmps + ' A';
+            if (d.batSoc !== undefined) {
+                document.getElementById('bat-soc-text').innerText = 'Mức SOC: ' + d.batSoc + '%';
+                document.getElementById('bat-soc-bar').style.width = d.batSoc + '%';
+            }
+
+            if (d.gtiPower !== undefined) {
+                document.getElementById('top-gti-power').innerText = d.gtiPower + ' W';
+                document.getElementById('gti-power').innerText = d.gtiPower + ' W';
+            }
+            if (d.gtiFreq !== undefined && d.gridVolts !== undefined) {
+                document.getElementById('gti-volts-freq').innerText = d.gridVolts + 'V - ' + d.gtiFreq + 'Hz';
+            }
+            if (d.gridVolts !== undefined) document.getElementById('grid-volts-text').innerText = 'EVN Grid ' + Math.round(d.gridVolts) + 'V';
+            if (d.gridPower !== undefined) {
+                document.getElementById('top-grid-power').innerText = d.gridPower + ' W';
+                document.getElementById('grid-power').innerText = d.gridPower + ' W';
+            }
+
+            if (d.loadPower !== undefined) {
+                document.getElementById('top-load-power').innerText = d.loadPower + ' W';
+                document.getElementById('load-power').innerText = d.loadPower + ' W';
+            }
+
+            if (d.savingsVnd !== undefined) {
+                const formatted = Number(d.savingsVnd).toLocaleString('vi-VN') + ' đ';
+                document.getElementById('header-savings').innerText = formatted;
+                document.getElementById('top-savings').innerText = formatted;
+            }
+        }
+
+        window.switchTab = function(tab) {
             const realtimeView = document.getElementById('realtimeView');
             const historyView = document.getElementById('historyView');
             const rBtn = document.getElementById('tabRealtimeBtn');
@@ -450,7 +536,7 @@ const htmlContent = `<!DOCTYPE html>
             }
         }
 
-        function switchView(type) {
+        window.switchView = function(type) {
             const chartDiv = document.getElementById('view-chart-container');
             const tableDiv = document.getElementById('view-table-container');
             const btnC = document.getElementById('btn-chart');
@@ -470,10 +556,7 @@ const htmlContent = `<!DOCTYPE html>
         }
 
         function initHistoryTableAndChart() {
-            let totalDischarge = 0;
-            let totalGrid = 0;
-            let totalLoad = 0;
-
+            let totalDischarge = 0, totalGrid = 0, totalLoad = 0;
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
             historyDaysData.forEach(item => {
@@ -481,12 +564,12 @@ const htmlContent = `<!DOCTYPE html>
                 totalGrid += item.grid;
                 totalLoad += item.load;
 
-                tbody.innerHTML += '<tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">' +
-                    '<td class="py-3 px-4 font-bold text-slate-200">' + item.date + '</td>' +
-                    '<td class="py-3 px-4 text-cyan-400 font-bold">' + item.discharge.toFixed(2) + '</td>' +
-                    '<td class="py-3 px-4 text-amber-400 font-bold">' + item.grid.toFixed(2) + '</td>' +
-                    '<td class="py-3 px-4 text-purple-400 font-bold">' + item.load.toFixed(2) + '</td>' +
-                '</tr>';
+                tbody.innerHTML += \`<tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
+                    <td class="py-3 px-4 font-bold text-slate-200">\${item.date}</td>
+                    <td class="py-3 px-4 text-cyan-400 font-bold">\${item.discharge.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-amber-400 font-bold">\${item.grid.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-purple-400 font-bold">\${item.load.toFixed(2)}</td>
+                </tr>\`;
             });
 
             document.getElementById('sum-discharge').innerText = totalDischarge.toFixed(2) + ' kWh';
@@ -560,7 +643,6 @@ const htmlContent = `<!DOCTYPE html>
             setPathD('path-mppt-bat-discharge', 'guide-mppt-bat-discharge', 'M ' + batTopRight.x + ' ' + batTopRight.y + ' L ' + mpptBottomRight.x + ' ' + mpptBottomRight.y);
             setPathD('path-mppt-gti', 'guide-mppt-gti', 'M ' + fixedMpptRight.x + ' ' + fixedMpptRight.y + ' L ' + gtiLeft.x + ' ' + gtiLeft.y);
 
-            // Hai đường độc lập chạy song song, định vị điểm đến tách biệt ở đỉnh Tải gia đình (chia đôi bề ngang khối Tải)
             const loadLeftX = loadTop.x - 20;
             const loadRightX = loadTop.x + 20;
 
@@ -634,27 +716,7 @@ const server = http.createServer((req, res) => {
     res.end(htmlContent);
     return;
   }
-  if (req.method === 'POST' && req.url === '/update') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => {
-      try {
-        state = { ...state, ...JSON.parse(body) };
-        wss.clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(state));
-        });
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'success' }));
-      } catch (e) {
-        res.writeHead(400); res.end('Invalid JSON');
-      }
-    });
-    return;
-  }
   res.writeHead(404); res.end();
 });
-
-const wss = new WebSocket.Server({ server });
-wss.on('connection', ws => ws.send(JSON.stringify(state)));
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
