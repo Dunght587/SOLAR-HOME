@@ -59,6 +59,14 @@ mqttClient.on('message', (topic, payload) => {
     console.error('Lỗi phân tích tin nhắn MQTT:', e);
   }
 });
+
+mqttClient.on('error', (err) => {
+  console.error('LỖI KẾT NỐI MQTT:', err.message);
+});
+
+mqttClient.on('offline', () => {
+  console.log('MQTT Client đang ngoại tuyến (offline)');
+});
 // ---------------------------------------
 
 const htmlContent = `<!DOCTYPE html>
@@ -264,7 +272,7 @@ const htmlContent = `<!DOCTYPE html>
 
         function updatePaths() {
             const pvBottom = getBoxAnchor('block-pv', 'bottom');
-            const mpptTop = getBoxAnchor('block-mppt', 'top');
+            const mpptTop = document.getElementById('block-mppt') ? getBoxAnchor('block-mppt', 'top') : {x:0, y:0};
             const gtiLeft = getBoxAnchor('block-gti', 'left');
             const loadTop = getBoxAnchor('block-load', 'top');
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
