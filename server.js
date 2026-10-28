@@ -287,13 +287,18 @@ const htmlContent = `<!DOCTYPE html>
         function updatePaths() {
             const pvBottom = getBoxAnchor('block-pv', 'bottom');
             const mpptTop = document.getElementById('block-mppt') ? getBoxAnchor('block-mppt', 'top') : {x:0, y:0};
-            const gtiLeft = getBoxAnchor('block-gti', 'left');
+            const gtiRight = getBoxAnchor('block-gti', 'right');
             const loadTop = getBoxAnchor('block-load', 'top');
             const gridBottom = getBoxAnchor('block-grid', 'bottom');
 
+            // Nối PV -> MPPT (Đường thẳng đứng)
             document.getElementById('path-pv-mppt')?.setAttribute('d', \`M \${pvBottom.x} \${pvBottom.y} L \${mpptTop.x} \${mpptTop.y}\`);
-            document.getElementById('path-gti-load')?.setAttribute('d', \`M \${gtiLeft.x} \${gtiLeft.y} L \${loadTop.x} \${loadTop.y}\`);
+            
+            // Nối Lưới điện -> Tải gia đình (Đường thẳng đứng)
             document.getElementById('path-grid-load')?.setAttribute('d', \`M \${gridBottom.x} \${gridBottom.y} L \${loadTop.x} \${loadTop.y}\`);
+            
+            // Nối GTI -> Tải gia đình (Chạy sang phải đến trục X của Lưới/Tải rồi vuông góc đi xuống hòa chung vào đường Lưới Điện)
+            document.getElementById('path-gti-load')?.setAttribute('d', \`M \${gtiRight.x} \${gtiRight.y} L \${loadTop.x} \${gtiRight.y} L \${loadTop.x} \${loadTop.y}\`);
         }
     </script>
 </body>
